@@ -46,6 +46,7 @@ function busIDxWaitingTime(notes) {
 // busIDxWaitingTime(realNotes);
 
 //* PART TWO
+// (Chinese remainder theorem)
 
 // The shuttle company is running a contest: one gold coin for anyone that can find the earliest timestamp such that the first bus ID departs at that time and each subsequent listed bus ID departs at that subsequent minute. (The first line in your input is no longer relevant.)
 
