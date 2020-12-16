@@ -620,3 +620,95 @@ function sumOfValues(input) {
 // sumOfValues(sampleDockingProgram); // 165
 // sumOfValues(actualDockingProgram); // 13496669152158
 
+
+//* PART TWO
+
+// A version 2 decoder chip doesn't modify the values being written at all. Instead, it acts as a memory address decoder. Immediately before a value is written to memory, each bit in the bitmask modifies the corresponding bit of the destination memory address in the following way:
+
+// - If the bitmask bit is 0, the corresponding memory address bit is unchanged.
+// - If the bitmask bit is 1, the corresponding memory address bit is overwritten with 1.
+// - If the bitmask bit is X, the corresponding memory address bit is floating.
+// A floating bit is not connected to anything and instead fluctuates unpredictably. In practice, this means the floating bits will take on all possible values, potentially causing many memory addresses to be written all at once!
+
+let sampleDockingProgram2 = `mask = 000000000000000000000000000000X1001X
+mem[42] = 100
+mask = 00000000000000000000000000000000X0XX
+mem[26] = 1`;
+
+function writeToAllPossibleAddresses(input) {
+	
+	// I. PARSE INPUT, CREATE VARIABLES
+	const program = input.split('\n');
+	
+	const addressesObj = {};
+	let mask;
+	
+	const maskStart = program[0].lastIndexOf(' ') + 1;
+	const len = program.length;
+
+	// II. ITERATE
+	for (let i = 0; i < len; i++) {
+		let line = program[i];
+
+		// 3. if mask:
+		// - set mask variable to new mask
+		if (line.substring(0, 4) === 'mask') {
+			mask = line.substring(maskStart);
+			continue;
+		}
+
+		let memoryAddress = line.substring(4, line.indexOf(' ') - 1);
+		memoryAddress = parseInt(memoryAddress).toString(2).padStart(36, '0');
+
+		// 4. if mem:
+
+		// 4.1. apply mask to address
+		let maskedAddress = memoryAddress.split('').map((ch, i) => {
+			if (mask[i] === '1') return '1'
+			if (mask[i] === '0') return ch
+			if (mask[i] === 'X') return 'X'
+		}).join('');
+		// console.log(maskedAddress);
+
+		// 4.2. generate multiple addresses and convert them to decimal nums
+		const permutations = [];
+		let currentPerm = '';
+		
+		generatePermutations(0, currentPerm);
+		
+		function generatePermutations(i, currentP) {
+			if (i === maskedAddress.length - 1) {
+				if (maskedAddress[i] === 'X') {
+					permutations.push(currentP + '1');
+					permutations.push(currentP + '0');
+				} else {
+					permutations.push(currentP + maskedAddress[i]);
+				}
+			}
+			if (maskedAddress[i] === 'X') {
+				generatePermutations(i+1, currentP + '1');
+				generatePermutations(i+1, currentP + '0');
+				
+			}
+			if (maskedAddress[i] === '1' || maskedAddress[i] === '0') {
+				generatePermutations(i+1, currentP + maskedAddress[i]);
+			}
+		}
+		// console.log(maskedAddress, '\n', permutations);
+
+		// 4.3. write every address to the addresses object with curr value
+
+		let value = parseInt(line.substring(line.lastIndexOf(' ') + 1));
+		permutations.forEach(address => addressesObj[address] = value)
+	}
+	
+	// III. SUM
+	// 4.4. calculate and return sum of values
+	let sum = Object.values(addressesObj).reduce((a, c) => a + c, 0)
+	console.log(sum);
+	return sum;
+}
+
+// writeToAllPossibleAddresses(sampleDockingProgram2); // 208
+writeToAllPossibleAddresses(actualDockingProgram); // 3278997609887
+
