@@ -11,7 +11,7 @@ let sampleNumbers7 = `3,1,2`;
 let puzzleInput = `8,11,0,19,1,2`;
 
 
-//* PART ONE
+//* PART ONE & TWO
 
 // In this game, the players take turns saying numbers. They begin by taking turns reading from a list of starting numbers (your puzzle input). Then, each turn consists of considering the most recently spoken number:
 
@@ -20,15 +20,20 @@ let puzzleInput = `8,11,0,19,1,2`;
 
 // So, after the starting numbers, each turn results in that player speaking aloud either 0 (if the last number is new) or an age (if the last number is a repeat).
 
-//? Their question for you is: what will be the 2020th number spoken?
+//? Their question for you is:
+//? — what will be the 2020th number spoken?
+//? — what will be the 30000000th number spoken?
 
 function playSpeakNumbers(input, until) {
 	
 	const numbers = input.split(',');
 	console.log('input:', numbers);
-	const numsMap = {};
+
+	// IMPORTANT: Using the correct data type matters! E.g. Map "performs better in scenarios involving frequent additions and removals of key-value pairs" (MDN)
+	const numsMap = new Map();
+	
 	// add the first portion of nums to the map
-	numbers.forEach((num, idx) => numsMap[num] = idx + 1);
+	numbers.forEach((num, idx) => numsMap.set(Number(num), idx + 1));
 	
 	// at each iteration, check if the num has been already spoken before. then, set the last value to either 0 or diff between the turns it was last invoked
 	let last = numbers[numbers.length - 1];
@@ -36,17 +41,16 @@ function playSpeakNumbers(input, until) {
 	
 	for (; turn <= until; turn++) {
 		// that's only for the 6 at the start
-		if (numsMap[last] === turn - 1) {
+		if (numsMap.get(last) === turn - 1) {
 			last = 0;
-			
 		} else {
-			if (!numsMap[last]) {
-				numsMap[last] = turn - 1;
+			if (!numsMap.has(last)) {
+				numsMap.set(last, turn - 1);
 				last = 0;
 			} else {
-				let next = turn-1 - numsMap[last]
-				numsMap[last] = turn - 1
-				last = next
+				let next = turn-1 - numsMap.get(last);
+				numsMap.set(last, turn - 1);
+				last = next;
 			}
 			
 		}
@@ -77,4 +81,4 @@ let lastTurn1 = 2020;
 
 let lastTurn2 = 30000000;
 
-playSpeakNumbers(puzzleInput, lastTurn2); // 11721679
+// playSpeakNumbers(puzzleInput, lastTurn2); // 11721679
